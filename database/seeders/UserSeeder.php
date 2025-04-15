@@ -5,13 +5,13 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use Faker\Factory as Faker;
+use Faker\Factory;
 
 class UserSeeder extends Seeder
 {
     public function run()
     {
-        $faker = Faker::create();
+        $faker = Factory::create();
 
         // Tạo 5 user đăng nhập bằng email & mật khẩu
         for ($i = 1; $i <= 5; $i++) {
