@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use http\Env\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class GeminiService
@@ -19,148 +21,157 @@ class GeminiService
         $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"; // Cập nhật model
     }
 
-    function getWikipediaImage($placeName)
+    public function getEvent($data)
     {
-        $result = $this->goMapsService->geocode($placeName);
-        if (isset($result[0]['lat']) && isset($result[0]['lon'])) {
-            $lat = $result[0]['lat'] ?? null;
-            $lon = $result[0]['lon'] ?? null;
-            if ($lat && $lon) {
-                echo "Latitude: $lat, Longitude: $lon";
-            } else {
-                echo "Không tìm thấy tọa độ!";
-            }
-        } else {
-            if (isset($result['lat']) && isset($result['lat'])){
-                $lat = $result['lat'] ?? null;
-                $lon = $result['lon'] ?? null;
-                echo "Latitude2: $lat, Longitude2: $lon";
-            }
-            echo "Dữ liệu trả về không hợp lệ!";
+        $address        = $data['address'];
+        $startDate      = $data['start_date'];
+        $endDate        = $data['end_date'];
+
+        $dataString_event = $address . $startDate . $endDate;
+        $cacheKey_event = md5($dataString_event);
+        if (Cache::has($cacheKey_event)) {
+            return Cache::get($cacheKey_event);
         }
-        echo "địa điểm: $placeName";
-        $url = "https://graph.mapillary.com/images?access_token=MLY|9769366856460262|4f4d94c3a215987a89b4d3bafbba3ba4&fields=id,thumb_1024_url&closeto=$lon,$lat";
 
-        dd($url);
+        $prompt = "Hãy tìm kiếm các sự kiện và lễ hội diễn ra quanh khu vực sau: \"" . $address . "\".\n";
+        $prompt .= "Khoảng thời gian quan tâm là từ ngày " . $startDate . " đến ngày " . $endDate . ", vui lòng bao gồm cả các sự kiện có thể diễn ra trong khoảng 5 đến 10 ngày sau ngày kết thúc.\n";
+        $prompt .= "Kết quả trả về cần được cấu trúc dưới dạng JSON hợp lệ theo định dạng sau:\n\n";
+        $prompt .= "```json\n";
+        $prompt .= "[\n";
+        $prompt .= "  {\n";
+        $prompt .= "    \"name\": \"[Tên sự kiện hoặc lễ hội]\",\n";
+        $prompt .= "    \"date\": \"[Ngày diễn ra (có thể là một ngày hoặc một khoảng thời gian)]\",\n";
+        $prompt .= "    \"location\": \"[Địa điểm cụ thể]\",\n";
+        $prompt .= "    \"description\": \"[Mô tả ngắn gọn về sự kiện hoặc lễ hội]\"\n";
+        $prompt .= "  },\n";
+        $prompt .= "  {\n";
+        $prompt .= "    \"name\": \"[Tên sự kiện hoặc lễ hội khác]\",\n";
+        $prompt .= "    \"date\": \"[Ngày diễn ra]\",\n";
+        $prompt .= "    \"location\": \"[Địa điểm]\",\n";
+        $prompt .= "    \"description\": \"[Mô tả]\"\n";
+        $prompt .= "  }\n";
+        $prompt .= "  // ... Thêm các sự kiện khác nếu có\n";
+        $prompt .= "]\n";
+        $prompt .= "```\n\n";
+        $prompt .= "Hãy đảm bảo rằng kết quả trả về là một JSON hợp lệ và không có bất kỳ văn bản nào khác ngoài cấu trúc JSON này.";
 
+
+        $response = Http::post($this->apiUrl . "?key=" . $this->apiKey, [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ]
+        ]);
+
+        $activity = $response->json();
+        $activity = $activity['candidates'][0]['content']['parts'][0]['text'];
+        $activity = str_replace('\n', '', $activity);
+        $activity = str_replace('`', '', $activity);
+        $activity = str_replace('json', '', $activity);
+//        dd($plan);
+        $cleanedString = str_replace(chr(0xC2).chr(0xA0), ' ', $activity);
+        $cleanedString = preg_replace('/,\s*([\}\]])/', '$1', $cleanedString);
+        $cleanedString = trim($cleanedString);
+        $activityAray = null;
+        try {
+            $activityAray = json_decode($cleanedString, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            echo "Lỗi khi phân tích chuỗi text sau khi làm sạch (vẫn chưa phải JSON hợp lệ): " . $e->getMessage() . "\n";
+            echo "Mã lỗi JSON: " . json_last_error() . " - " . json_last_error_msg() . "\n";
+            // In ra chuỗi đã làm sạch để kiểm tra lỗi còn sót lại
+            echo "\n--- Chuỗi đã làm sạch (gây lỗi) --- \n";
+            echo htmlspecialchars($cleanedString);
+            echo "\n---------------------------------\n";
+        }
+
+
+
+//        dd($activityAray);
+        Cache::put($cacheKey_event, $activityAray, now()->addMinutes(60));
+
+        return $activityAray;
     }
 
-
-//    function updatePlacesWithImages(&$places) {
-////        foreach ($places as $key => &$place) {
-////            if (!empty($place[0])) {
-////                $image = $this->getWikipediaImage($place[0]);
-////                dd($image);
-////                $place["Hình ảnh"] = $image;
-////            }
-////        }
-//        $apiKey = "AlzaSypGYiFolXtBsAIjcR_nRfEUKjOAwt0N0Zf"; // Thay bằng API key của bạn
-//        $placeName = "Rừng tràm Trà Sư";
-//        $url = "https://app.gomaps.pro/api/v1/places/search?query=" . urlencode($placeName) . "&apiKey=" . $apiKey;
-//        dd($url);
-//        $response = Http::get($url)->json();
-//        print_r($response);
-//
-//
-//
-//    }
-
-    public function generateItinerary($address, $days, $startDate, $endDate, $budget, $currencyCode, $interest, $adults, $children_1, $children_2, $placename, $transportation)
+    public function chatBot($data)
     {
-        $prompt = "Lên kế hoạch du lịch tại $address, mô tả chi tiết (Sáng, trưa, chiều, tối làm gì ăn và ngủ ở đâu) chỉ bao gồm các địa điểm $placename (có thể ít hơn hay loại bỏ một số địa điểm nếu số ngày du lịch có hạn) trong $days ngày (từ ngày $startDate đến $endDate) bằng phương tiện di chuyển: $transportation với số lượng (người trưởng thành: $adults, trẻ em từ 2 đến 10 tuổi: $children_2, trẻ em dưới 2 tuổi: $children_1). Nơi bắt đầu du lịch là $address, tôi cần có đầy đủ các lần di chuyển mỗi khi tham quan, ăn uống, nghỉ chân, mỗi lần di chuyển cần có: Điểm xuất phát → Điểm đến, Khoảng cách (km/m), Phương tiện di chuyển phù hợp, Thời gian di chuyển (phút, số cụ thể) và làm ơn bỏ 'tùy thuộc vào điểm xuất phát và tốc độ di chuyển' đi giùm tôi.
-        Sở thích: $interest. Ngân sách: $budget $currencyCode. KHÔNG ĐƯA RA LƯU Ý HAY GỢI Ý GÌ THÊM
+        $userMessage = $data['message'];
 
+        $prompt = "Bạn là một trợ lý AI chuyên tư vấn về du lịch. Hãy trả lời một cách hữu ích, ngắn gọn và đúng trọng tâm:\n\n" . $userMessage;
 
-        cấu trúc dạng:
-            **Ngày **
-                *Sáng*
-                    [Ăn sáng]
-                        - Tên địa điểm ăn sáng
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Địa điểm tham quan]
-                        - Tên địa điểm
-                        - Thời gian tham quan: từ (thời gian) -> đến (thời gian)
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Địa điểm tham quan]
-                        - Tên địa điểm
-                        - Thời gian tham quan: từ (thời gian) -> đến (thời gian)
-                *Trưa*
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Ăn Trưa]
-                        - Tên địa điểm ăn trưa
-                *Chiều*
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Địa điểm tham quan]
-                        - Tên địa điểm
-                        - Thời gian tham quan: từ (thời gian) -> đến (thời gian)
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Địa điểm tham quan]
-                        - Tên địa điểm
-                        - Thời gian tham quan: từ (thời gian) -> đến (thời gian)
-                *Tối*
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Ăn tối]
-                        - Tên địa điểm ăn tối
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Địa điểm tham quan]
-                        - Tên địa điểm
-                        - Thời gian tham quan: từ (thời gian) -> đến (thời gian)
-                    [Di chuyển]
-                        - Điểm đi: vị trí, tên địa điểm bắt đầu di chuyển
-                        - Điểm đến: vị trí, tên địa điểm muốn đến
-                        - Khoảng cách: đơn vị (km)
-                        - thời gian: giờ/phút
-                        - phương tiện di chuyển: đề xuất phương tiện di chuyển (hoặc phương tiện cá nhân của người du lịch)
-                    [Chỗ ngủ]
-                        - Tên địa điểm nghỉ chân qua đêm
-//
-        ";
+        try {
+            $response = Http::post($this->apiUrl . "?key=" . $this->apiKey, [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
 
+            $response->throw(); // Throw an exception if the response has an error status code
 
+            $answer = $response->json('candidates.0.content.parts.0.text') ?? 'Xin lỗi, tôi không hiểu.';
 
+            return $answer;
 
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            \Log::error("Lỗi khi gọi Gemini API: " . $e->getMessage());
+            return "Xin lỗi, đã có lỗi xảy ra khi liên hệ với trợ lý AI.";
+        }
+    }
+    public function generateItinerary($data)
+    {
+        $address        = $data['address'];
+        $startDate      = $data['start_date'];
+        $endDate        = $data['end_date'];
+        $placeName      = $data['placeName'];
+        $budget         = $data['budget'];
+        $currencyCode   = $data['currency'];
+        $interest       = $data['interest'];
+        $adults         = $data['adults'];
+        $children_1     = $data['children_1'];
+        $children_2     = $data['children_2'];
+        $transportation = $data['transportation'];
 
+        $dataString = $address . $startDate . $endDate . $budget . $currencyCode . $interest . $adults . $children_1 . $children_2 . $transportation;
+        $cacheKey = md5($dataString);
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
 
+        $prompt = "Hãy tạo một kế hoạch du lịch chi tiết cho chuyến đi tại $address, bắt đầu từ ngày $startDate đến ngày $endDate.
+                    Thông tin chuyến đi:
+                    - Điểm bắt đầu: $address
+                    - Phương tiện di chuyển chính: $transportation
+                    - Số lượng người: Người lớn: $adults, Trẻ em (2-10 tuổi): $children_2, Trẻ em (<2 tuổi): $children_1
+                    - Các địa điểm mong muốn tham quan (có thể chọn lọc/bỏ bớt nếu thời gian không đủ): $placeName
+                    - Sở thích: $interest
+                    - Ngân sách: $budget $currencyCode
 
+                    YÊU CẦU QUAN TRỌNG VỀ ĐỊNH DẠNG ĐẦU RA:
+                    Hãy trả về kết quả dưới dạng MỘT ĐỐI TƯỢNG JSON HỢP LỆ DUY NHẤT. Không bao gồm bất kỳ văn bản giới thiệu, giải thích, không trả lời thiếu nhất quán (như tự tìm quán, tự tìm) tôi cần tên địa điểm cụ thể, markdown formatting (như **, *), hay ghi chú nào khác ngoài đối tượng JSON này.
 
+                    CẤU TRÚC JSON MONG MUỐN NHƯ SAU:
+                    - Đối tượng JSON gốc có các key là chuỗi đại diện cho từng ngày (ví dụ: 'Ngày 1', 'Ngày 2',...).
+                    - Giá trị của mỗi key ngày là một đối tượng chứa các key là 'Sáng', 'Trưa', 'Chiều', 'Tối'.
+                    - Giá trị của mỗi key buổi (Sáng, Trưa, Chiều, Tối) là MỘT MẢNG (JSON array) chứa các đối tượng đại diện cho từng hoạt động theo thứ tự thời gian.
+                    - Mỗi đối tượng hoạt động trong mảng phải có 2 key chính:
+                        1. 'type': Chuỗi cho biết loại hoạt động (ví dụ: 'Ăn sáng', 'Di chuyển', 'Địa điểm tham quan', 'Ăn trưa', 'Ăn tối', 'Chỗ ngủ').
+                        2. 'details': Giá trị của key này phụ thuộc vào loại hoạt động:
+                            - Đối với 'Ăn sáng', 'Ăn trưa', 'Ăn tối', 'Chỗ ngủ': Giá trị là một CHUỖI (JSON string) mô tả địa điểm/chi tiết (ví dụ: 'Phở khô Gia Lai (tự tìm quán)').
+                            - Đối với 'Di chuyển': Giá trị là MỘT ĐỐI TƯỢNG (JSON object) chứa các key sau: 'Điểm đi' (chuỗi), 'Điểm đến' (chuỗi), 'Khoảng cách' (chuỗi, ví dụ: '2 km'), 'Thời gian' (chuỗi, ví dụ: '5 phút'), 'Phương tiện di chuyển' (chuỗi). Hãy cung cấp ước tính khoảng cách và thời gian cụ thể, không dùng các cụm từ chung chung như 'tùy thuộc vào...'.
+                            - Đối với 'Địa điểm tham quan': Giá trị là MỘT ĐỐI TƯỢNG (JSON object) chứa các key sau: 'Tên địa điểm' (chuỗi) và 'Thời gian tham quan' (chuỗi, ví dụ: '8:00 -> 10:00').
 
+                    Lập kế hoạch chi tiết cho từng buổi (Sáng, trưa, chiều, tối) bao gồm các hoạt động ăn uống, tham quan, nghỉ ngơi và ĐẦY ĐỦ các bước di chuyển giữa các địa điểm. Đảm bảo tính logic về thời gian và lộ trình.
 
+                    NHẮC LẠI: Chỉ trả về đối tượng JSON hợp lệ. KHÔNG ĐƯA RA LƯU Ý HAY GỢI Ý GÌ THÊM.";
 
+                    // Bây giờ bạn có thể gửi $prompt này đến AI API
+                    // và xử lý kết quả trả về bằng json_decode($apiResponse, true) trong PHP
 
         $response = Http::post($this->apiUrl . "?key=" . $this->apiKey, [
             'contents' => [
@@ -174,63 +185,41 @@ class GeminiService
 
         $plan = $response->json();
         $plan = $plan['candidates'][0]['content']['parts'][0]['text'];
-        dd($plan);
-
-        $plan = str_replace('*', '', $plan);
-
-
-
-
-        $lines = explode("\n", $plan);
-        $result = [];
-        $skip = false;
-        $currentDay = null;
-        $timeSlot = null;
-
-        foreach ($lines as $line => $value) {
-            $value = trim($value);
-
-            if ($value == '"Lưu ý"' || $value == '"Lời khuyên"') {
-                $skip = true;
-                continue;
-            }
-
-            if ($skip) {
-                continue;
-            }
-
-            // Kiểm tra dòng "Ngày"
-            if (preg_match("/^Ngày \d+:/", $value)) {
-                $currentDay = $value;
-                $result[$currentDay] = [];
-                $timeSlot = null; // Reset time slot cho ngày mới
-                continue;
-            }
-//            dd($result);
-
-            if (preg_match("/^\s*(Sáng|Trưa|Chiều|Tối):/", $value, $matches)) {
-                $timeSlot = trim($matches[1]);
-                $result[$currentDay][$timeSlot] = [];
-                continue;
-            }
-
-            if ($currentDay !== null && $timeSlot !== null && !empty($value)) {
-                $result[$currentDay][$timeSlot][] = $value;
-            }
+        $plan = str_replace('\n', '', $plan);
+        $plan = str_replace('`', '', $plan);
+        $plan = str_replace('json', '', $plan);
+//        dd($plan);
+        $cleanedString = str_replace(chr(0xC2).chr(0xA0), ' ', $plan);
+        $cleanedString = preg_replace('/,\s*([\}\]])/', '$1', $cleanedString);
+        $cleanedString = trim($cleanedString);
+        $planArray = null; // Khởi tạo
+        try {
+            $planArray = json_decode($cleanedString, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            echo "Lỗi khi phân tích chuỗi text sau khi làm sạch (vẫn chưa phải JSON hợp lệ): " . $e->getMessage() . "\n";
+            echo "Mã lỗi JSON: " . json_last_error() . " - " . json_last_error_msg() . "\n";
+            // In ra chuỗi đã làm sạch để kiểm tra lỗi còn sót lại
+            echo "\n--- Chuỗi đã làm sạch (gây lỗi) --- \n";
+            echo htmlspecialchars($cleanedString);
+            echo "\n---------------------------------\n";
         }
 
+        Cache::put($cacheKey, $planArray, now()->addMinutes(60));
 
-//        dd($result);
-
-
-        return $result;
+        return $planArray;
     }
     public function getTourismInfo($address, $interests = [])
     {
+        $interests_string = implode(', ', $interests);
+        $dataString_getPlaces = $address . $interests_string;
+        $cacheKey_getPlaces = md5($dataString_getPlaces);
+        if (Cache::has($cacheKey_getPlaces)) {
+            return Cache::get($cacheKey_getPlaces);
+        }
         $prompt = "Hãy cung cấp thông tin về các địa điểm du lịch nổi tiếng nhất của khu vực $address.";
 
         if (!empty($interests)) {
-            $prompt .= " Lọc theo sở thích: " . implode(", ", $interests) . ".";
+            $prompt .= " Lọc theo sở thích: " . $interests_string . ".";
         }
 
         $prompt .= " Bao gồm:
@@ -302,6 +291,7 @@ class GeminiService
                 $result[$key]["Tag"] = $tags;
             }
         }
+        Cache::put($cacheKey_getPlaces, $result, now()->addMinutes(60));
         return $result;
     }
 }

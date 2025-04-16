@@ -173,12 +173,10 @@
                                 <ol class="carousel-indicators menu-schedule mb-1">
                                     <li data-bs-target="#carouselId" data-bs-slide-to="0" class="border-0 m-0 p-0 active col-lg-4">List of locations</li>
                                     <li data-bs-target="#carouselId" data-bs-slide-to="1" class="border-0 m-0 p-0 col-lg-4 Schedule-tab">Schedule</li>
-                                    <li data-bs-target="#carouselId" data-bs-slide-to="2" class="border-0 m-0 p-0 col-lg-4">Event/Activity</li>
+                                    <li data-bs-target="#carouselId" data-bs-slide-to="2" class="border-0 m-0 p-0  col-lg-4 Event-tab">Event/Activity</li>
                                 </ol>
                                 <div class="carousel-inner border-top h-95 mb-2" role="listbox">
                                     <div class="carousel-item active h-100 list-of-locations mt-2">
-{{--                                        {{dd($places)}}--}}
-
                                         @if(isset($places))
                                             @foreach($places as $place => $thong_tin)
                                                 <div class="w-100 h-30 border me-1 mb-2">
@@ -189,10 +187,7 @@
                                                                 <img class="w-65 h-80 ms-2 rounded position-absolute sec-image" src="{{asset('frontend/images/destination-3.jpg')}}">
                                                             </div>
                                                             <div class="w-65 h-60 m-auto p-0">
-{{--                                                                @php unset($thong_tin["Mô tả"]) @endphp--}}
-{{--                                                            {{dd($thong_tin)}}--}}
                                                                 @foreach ($thong_tin as $key => $value)
-
                                                                     @if($key == "Tên" || $key == "Tên địa điểm" || $key == 0)
                                                                             <p class="fw-bold">{{$value}}</p>
                                                                     @else
@@ -216,13 +211,10 @@
                                         @endif
                                     </div>
                                     <div id="schedule-response" class="carousel-item h-100 schedule">
-
-
-                                        <!-- Testimonial Start -->
                                         <div id="btn-build-schedule" class="container-fluid h-50 mt-2">
                                             <div id="schedule-response" class="container h-100 text-center">
-                                                <button id="generateSchedule" class="rounded btn btn-primary p-3 m-t-100" data-place-names="{{ $placeNames }}">
-                                                    <span class="d-none" id="get-url" data-url="{{route('build-schedule')}}"></span>
+                                                <button id="generateSchedule" class="rounded btn btn-primary p-3 m-t-100" data-place-names="{{ json_encode($for_schedule) }}">
+                                                    <span class="d-none" id="get-url-schedule" data-url="{{route('build-schedule')}}"></span>
                                                     <span class="d-block"><i class="bi bi-stars"></i> Generate Detailed Itinerary <i class="bi bi-stars"></i></span>
                                                     <span class="d-block fw-normal">- Based on a list of locations -</span>
                                                 </button>
@@ -238,13 +230,27 @@
                                             </div>
                                         </div>
                                         <!-- Spinner End -->
-
-
-                                        @if(isset($plans))
-                                            {{print_r($plans)}}
-                                        @endif
                                     </div>
+                                    <div id="event-response" class="carousel-item h-100 eventAndActivity mt-2">
+                                        <div id="btn-get-event" class="container-fluid h-50 mt-2">
+                                            <div id="schedule-response" class="container h-100 text-center">
+                                                <button id="getEvent" class="rounded btn btn-primary p-3 m-t-100" data-address="{{ json_encode($for_event) }}">
+                                                    <span class="d-none" id="get-url-event" data-url="{{route('get-event')}}"></span>
+                                                    <span class="d-block"><i class="bi bi-stars"></i>&nbsp; Check out current events and activities &nbsp;<i class="bi bi-stars"></i></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- Spinner Start -->
+                                        <div class="position-relative h-50">
+                                            <div id="spinner3" class="show bg-white position-absolute translate-middle w-100 top-50 start-50 align-items-center justify-content-center d-none">
+                                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                                    <span class="sr-only">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Spinner End -->
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -254,10 +260,9 @@
                 <div class="col-lg-5 p-0">
                     @if(isset($error))
                         <div class="alert alert-danger">{{ $error }}</div>
-                    @elseif(isset($data))
+                    @elseif(isset($map))
                         <div class="card border-start-0 border-0">
                             <div class="card-body pt-0">
-{{--                                <h4 class="card-title">{{ $data['formatted_address'] }}</h4>--}}
                                 <div id="map" style="width: 100%; height: 61rem;"></div>
                             </div>
                         </div>
@@ -395,14 +400,13 @@
     <!-- Back to Top -->
     <a href="#" class="btn btn-primary btn-primary-outline-0 btn-md-square back-to-top"><i class="fa fa-arrow-up"></i></a>
 
-    @if(isset($data))
+    @if(isset($map))
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script>
             var lat = {{ $lat ?? 21.0285 }};
             var lon = {{ $lon ?? 105.8542 }};
             var addr = '{{$address}}';
 
-            console.log(addr)
             var map = L.map('map').setView([lat, lon], 9);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -415,4 +419,5 @@
         </script>
 
     @endif
+
 @endsection

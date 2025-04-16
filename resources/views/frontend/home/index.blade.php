@@ -130,7 +130,7 @@
                                                 <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                             </div>
                                             <div class="search-icon">
-                                                <a href="{{asset("frontend/images/destination-1.jpg")}}" data-lightbox="destination-1"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                                <a href="{{asset("frontend/images/destination-1.jpg")}}" data-lightbox="destination-1"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -143,7 +143,7 @@
                                                 <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                             </div>
                                             <div class="search-icon">
-                                                <a href="{{asset("frontend/images/destination-2.jpg")}}" data-lightbox="destination-2"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                                <a href="{{asset("frontend/images/destination-2.jpg")}}" data-lightbox="destination-2"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -156,7 +156,7 @@
                                                 <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                             </div>
                                             <div class="search-icon">
-                                                <a href="{{asset("frontend/images/destination-7.jpg")}}" data-lightbox="destination-7"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                                <a href="{{asset("frontend/images/destination-7.jpg")}}" data-lightbox="destination-7"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -169,7 +169,7 @@
                                                 <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                             </div>
                                             <div class="search-icon">
-                                                <a href="{{asset('frontend/images/destination-8.jpg')}}" data-lightbox="destination-8"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                                <a href="{{asset('frontend/images/destination-8.jpg')}}" data-lightbox="destination-8"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -184,7 +184,7 @@
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset('frontend/images/destination-9.jpg')}}" data-lightbox="destination-4"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset('frontend/images/destination-9.jpg')}}" data-lightbox="destination-4"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -197,7 +197,7 @@
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset('frontend/images/destination-4.jpg')}}" data-lightbox="destination-4"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset('frontend/images/destination-4.jpg')}}" data-lightbox="destination-4"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -210,7 +210,7 @@
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset('frontend/images/destination-5.jpg')}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset('frontend/images/destination-5.jpg')}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -223,7 +223,7 @@
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset('frontend/images/destination-6.jpg')}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset('frontend/images/destination-6.jpg')}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -233,27 +233,27 @@
                         <div class="row g-4">
                             <div class="col-lg-6">
                                 <div class="destination-img">
-                                    <img class="img-fluid rounded w-100" src="{{asset("img/destination-5.jpg")}}" alt="">
+                                    <img class="img-fluid rounded w-100" src="{{asset("frontend/images/destination-5.jpg")}}" alt="">
                                     <div class="destination-overlay p-4">
                                         <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">20 Photos</a>
                                         <h4 class="text-white mb-2 mt-3">San francisco</h4>
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset("img/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset("frontend/images/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="destination-img">
-                                    <img class="img-fluid rounded w-100" src="{{asset("img/destination-6.jpg")}}" alt="">
+                                    <img class="img-fluid rounded w-100" src="{{asset("frontend/images/destination-6.jpg")}}" alt="">
                                     <div class="destination-overlay p-4">
                                         <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">20 Photos</a>
                                         <h4 class="text-white mb-2 mt-3">San francisco</h4>
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset("img/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset("frontend/images/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -263,27 +263,27 @@
                         <div class="row g-4">
                             <div class="col-lg-6">
                                 <div class="destination-img">
-                                    <img class="img-fluid rounded w-100" src="{{asset("img/destination-5.jpg")}}" alt="">
+                                    <img class="img-fluid rounded w-100" src="{{asset("frontend/images/destination-5.jpg")}}" alt="">
                                     <div class="destination-overlay p-4">
                                         <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">20 Photos</a>
                                         <h4 class="text-white mb-2 mt-3">San francisco</h4>
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset("img/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset("frontend/images/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="destination-img">
-                                    <img class="img-fluid rounded w-100" src="{{asset("img/destination-6.jpg")}}" alt="">
+                                    <img class="img-fluid rounded w-100" src="{{asset("frontend/images/destination-6.jpg")}}" alt="">
                                     <div class="destination-overlay p-4">
                                         <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">20 Photos</a>
                                         <h4 class="text-white mb-2 mt-3">San francisco</h4>
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset("img/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset("frontend/images/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -300,7 +300,7 @@
                                         <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                     </div>
                                     <div class="search-icon">
-                                        <a href="{{asset("frontend/images/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                        <a href="{{asset("frontend/images/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
@@ -312,7 +312,7 @@
                                             <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                         </div>
                                         <div class="search-icon">
-                                            <a href="{{asset("frontend/images/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                            <a href="{{asset("frontend/images/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -329,7 +329,7 @@
                                             <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                         </div>
                                         <div class="search-icon">
-                                            <a href="{{asset("frontend/images/destination5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                            <a href="{{asset("frontend/images/destination5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -342,7 +342,7 @@
                                             <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                         </div>
                                         <div class="search-icon">
-                                            <a href="{{asset("frontend/images/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                            <a href="{{asset("frontend/images/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -359,7 +359,7 @@
                                             <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                         </div>
                                         <div class="search-icon">
-                                            <a href="{{asset("frontend/images/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                            <a href="{{asset("frontend/images/destination-5.jpg")}}" data-lightbox="destination-5"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -372,7 +372,7 @@
                                             <a href="#" class="btn-hover text-white">View All Place <i class="fa fa-arrow-right ms-2"></i></a>
                                         </div>
                                         <div class="search-icon">
-                                            <a href="{{asset("img/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary"></i></a>
+                                            <a href="{{asset("img/destination-6.jpg")}}" data-lightbox="destination-6"><i class="fa fa-plus-square fa-1x btn btn-light btn-lg-square text-primary position-relative"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -578,7 +578,7 @@
 
 
         <!-- Gallery Start -->
-        <div class="container-fluid gallery py-5 my-5">
+        <div class="container-fluid gallery py-5 my-5 w-100">
             <div class="mx-auto text-center mb-5" style="max-width: 900px; margin-top: 10rem;">
                 <h5 class="section-title px-3">Our Gallery</h5>
                 <h1 class="mb-4">Tourism & Traveling Gallery.</h1>
@@ -613,9 +613,9 @@
                         </a>
                     </li>
                 </ul>
-                <div class="tab-content">
-                    <div id="GalleryTab-1" class="tab-pane fade show p-0 active">
-                        <div class="row g-2">
+                <div class="tab-content  w-100">
+                    <div id="GalleryTab-1" class="tab-pane fade show p-0 active  w-100">
+                        <div class="row g-2  w-100">
                             <div class="col-sm-6 col-md-6 col-lg-4 col-xl-2">
                                 <div class="gallery-item h-100">
                                     <img src="{{asset("frontend/images/gallery-1.jpg")}}" class="img-fluid w-100 h-100 rounded" alt="Image">
@@ -1269,6 +1269,11 @@
             </div>
         </div>
         <!-- Footer End -->
+
+        <!-- Chatbot -->
+        @include('.frontend.component.chatbot')
+        <!-- Chatbot End -->
+
 
         <!-- Copyright Start -->
         <div class="container-fluid copyright text-body py-4">

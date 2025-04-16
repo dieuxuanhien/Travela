@@ -13,3 +13,4 @@
 <script src="{{asset('lib/chosen_v1.8.7/chosen.jquery.min.js')}}"></script>
 <script src="{{asset('/frontend/js/main.js')}}?v={{time()}}"></script>
 <script src="{{asset('/frontend/js/func.js')}}?v={{time()}}"></script>
+

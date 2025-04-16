@@ -4,7 +4,6 @@
     "use strict";
     $(document).ready(function () {
         // Code của bạn ở đây
-        console.log('Hello from jQuery + Vite!');
 
         // Spinner
         var spinner = function () {
@@ -39,7 +38,6 @@
             }
         });
 
-        console.log('aaaaaaaaaa');
 
         // International Tour carousel
         $(".InternationalTour-carousel").owlCarousel({
@@ -132,7 +130,21 @@
                 }
             }
         });
-
+        // $(document).on('init','.schedule-carousel', function(event, slick) {
+        //     $('.slick-prev').on('click', function () {
+        //         console.log('Prev clicked');
+        //         slickAfterChange();
+        //     });
+        //
+        //     $('.slick-next').on('click', function () {
+        //         console.log('Next clicked');
+        //         slickAfterChange();
+        //     });
+        // });
+        $(document).on('afterChange','.schedule-carousel', function(event, slick, currentSlide){
+            console.log('Slide mới:', currentSlide);
+            slickAfterChange();
+        });
         $('.schedule-carousel').slick({
             centerMode: true,
             centerPadding: '0px',
@@ -169,7 +181,7 @@
             }
         });
         $('.back-to-top').click(function () {
-            $('html, body').animate({scrollTop: 0}, 1500, 'easeInOutExpo');
+            $('html, body').animate({scrollTop: 0}, 100, 'easeInOutExpo');
             return false;
         });
 
@@ -484,11 +496,8 @@
         /*  Ajax Provinces
         /*----------------------------------------------------*/
         // $(document).ready(function () {
-            console.log('aaaaa')
             $('#searchInput').on('input', function () {
                 let query = $(this).val().trim();
-                console.log(query)
-                console.log('bbbbbb')
 
                 if (query.length === 0) {
                     $('#results').hide();
@@ -566,13 +575,9 @@
         /*----------------------------------------------------*/
         $('#generateSchedule').click(function () {
             let placeNames = $(this).data('place-names');
-
-            console.log('123');
-
-            var url = $('#get-url').attr('data-url');
+            var url = $('#get-url-schedule').attr('data-url');
             $('#btn-build-schedule').remove();
             $('#spinner2').removeClass('d-none').addClass('d-flex');
-            console.log(url)
 
             $.ajax({
                 url: url,
@@ -625,7 +630,248 @@
         /*----------------------------------------------------*/
 
 
+        /*----------------------------------------------------*/
+        /*  Ajax Get Event And Activity
+        /*----------------------------------------------------*/
+        $('#getEvent').click(function () {
+            let address = $(this).data('address');
+            console.log(address)
+            var url = $('#get-url-event').attr('data-url');
+            console.log(url)
+            $('#btn-get-event').remove();
+            $('#spinner3').removeClass('d-none').addClass('d-flex');
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: { address: address },
+                success: function (data) {
+                    // $('.schedule-carousel').html(response.html);
+
+
+                    var $data = $(data);
+                    $('#event-response').html($data);
+                    $('.schedule-carousel').slick({
+                        centerMode: true,
+                        centerPadding: '0px',
+                        slidesToShow: 3,
+                        responsive: [
+                            {
+                                breakpoint: 768,
+                                settings: {
+                                    arrows: true,
+                                    centerMode: true,
+                                    centerPadding: '0px',
+                                    slidesToShow: 3
+                                }
+                            },
+                            {
+                                breakpoint: 480,
+                                settings: {
+                                    arrows: true,
+                                    centerMode: true,
+                                    centerPadding: '0px',
+                                    slidesToShow: 1
+                                }
+                            }
+                        ]
+                    });
+                    $('#spinner2').removeClass('d-flex').addClass('d-none');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Lỗi status:", status);  // Lỗi HTTP (404, 500, v.v.)
+                    console.error("Lỗi từ server:", xhr.responseText);  // Nội dung lỗi
+                    console.error("Chi tiết lỗi:", error);  // Mô tả lỗi
+
+                    alert("Có lỗi xảy ra: " + xhr.status + " - " + error);
+                }
+            });
+        });
+        /*----------------------------------------------------*/
+        /*  End Ajax Get Event And Activity
+        /*----------------------------------------------------*/
+
+
+        /*----------------------------------------------------*/
+        /*  Smooth Scroll To Detail Schedule
+        /*----------------------------------------------------*/
+        function slickAfterChange(){
+            var targetId = $('.slick-current').data('target');
+
+            const $parent = $('#schedule-content');
+            var targetSelector = '#' + targetId;
+
+            //const offsetTop = $(targetSelector).position().top;
+            const offsetTop = $(targetSelector).offset().top - $parent.offset().top + $parent.scrollTop();
+
+            // $('.schedule-carousel').slick();
+            console.log(targetId)
+
+
+            if ($(targetSelector).length) {
+                console.log(offsetTop)
+
+                $parent.animate({
+                    scrollTop: offsetTop
+                }, 500);
+
+                // $('html, body').animate({
+                //     scrollTop: targetPosition
+                // }, 800); // 800 là thời gian cuộn (miligiây), bạn có thể điều chỉnh
+            } else {
+                console.warn('Không tìm thấy phần tử mục tiêu với ID:', targetId);
+            }
+        }
+        $(document).on('click', '.target-day', function(event) {
+            // Ngăn chặn hành vi mặc định nếu cần (ví dụ nếu phần tử là thẻ <a>)
+            // event.preventDefault();
+            var targetId = $(this).data('target');
+            var index = $(this).data('slick-index');
+
+            const $parent = $('#schedule-content');
+            var targetSelector = '#' + targetId;
+
+            //const offsetTop = $(targetSelector).position().top;
+            const offsetTop = $(targetSelector).offset().top - $parent.offset().top + $parent.scrollTop();
+
+            // $('.schedule-carousel').slick();
+            console.log(targetId)
+
+            // Scroll đến slide số 2 (index = 1 vì bắt đầu từ 0)
+            $('.schedule-carousel').slick('slickGoTo', index);
+
+            if ($(targetSelector).length) {
+                console.log(offsetTop)
+
+                $parent.animate({
+                    scrollTop: offsetTop
+                }, 500);
+
+                // $('html, body').animate({
+                //     scrollTop: targetPosition
+                // }, 800); // 800 là thời gian cuộn (miligiây), bạn có thể điều chỉnh
+            } else {
+                console.warn('Không tìm thấy phần tử mục tiêu với ID:', targetId);
+            }
+        });
+
+
+        /*----------------------------------------------------*/
+        /*  End Smooth Scroll To Detail Schedule
+        /*----------------------------------------------------*/
+
+
+
+
+
+
+        /*----------------------------------------------------*/
+        /*  Chatbot
+        /*----------------------------------------------------*/
+        const $themeToggle = $('.theme-toggle');
+        const $containerChatbot = $('.container-chatbot');
+        const $chatContainer = $('#chatContainer');
+        const $chatContainerParent = $('#chatContainer-parent');
+        const $messageInput = $('.message-input');
+        const $sendButton = $('.send-button');
+        const $typingIndicator = $('.typing-indicator');
+        const $toggleChatbotButton = $('.ai-chatbot');
+        const $themeToggleButton = $('.theme-toggle-hide');
+        const $toggleIcon = $themeToggleButton.find('i');
+
+        // Theme toggling
+        let isDarkTheme = false;
+        $themeToggle.on('click', function () {
+            isDarkTheme = !isDarkTheme;
+            $containerChatbot.attr('data-theme', isDarkTheme ? 'dark' : 'light');
+            $themeToggle.html(isDarkTheme
+                ? '<i class="fas fa-sun"></i>'
+                : '<i class="fas fa-moon"></i>');
+        });
+
+        // Chat functionality
+        function createMessageElement(content, isUser = false) {
+            const className = isUser ? 'user-message' : 'bot-message';
+            return $(`
+            <div class="message ${className}">
+                <div class="message-bubble">${content}</div>
+            </div>
+        `);
+        }
+
+        function addMessage(content, isUser = false) {
+            const $messageElement = createMessageElement(content, isUser);
+            $chatContainer.append($messageElement);
+            $chatContainerParent.scrollTop($chatContainer[0].scrollHeight);
+        }
+
+        function showTypingIndicator() {
+            $typingIndicator.show();
+            $chatContainer.scrollTop($chatContainer[0].scrollHeight);
+        }
+
+        function hideTypingIndicator() {
+            $typingIndicator.hide();
+        }
+
+        function simulateBotResponse(userMessage) {
+            showTypingIndicator();
+            $.ajax({
+                url: $('#get_route_chatbot').attr('data-url'),
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: JSON.stringify({ message: userMessage }),
+                success: function (data) {
+                    hideTypingIndicator();
+                    addMessage(data.reply);
+                },
+                error: function () {
+                    hideTypingIndicator();
+                    console.error('Lỗi khi gửi yêu cầu đến AI');
+                    addMessage("Xin lỗi, có lỗi xảy ra khi liên hệ trợ lý AI.");
+                }
+            });
+        }
+
+        function handleSendMessage() {
+            const message = $messageInput.val().trim();
+            if (message) {
+                addMessage(message, true);
+                $messageInput.val('');
+                simulateBotResponse(message);
+            }
+        }
+
+        $sendButton.on('click', handleSendMessage);
+
+        $messageInput.on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                handleSendMessage();
+            }
+        });
+
+        setTimeout(function () {
+            addMessage("Hello! I'm your AI assistant. How can I help you today?");
+        }, 500);
+
+        $toggleChatbotButton.on('click', function () {
+            $containerChatbot.toggleClass('shrink');
+        });
+
+        $themeToggleButton.on('click', function () {
+            $containerChatbot.addClass('shrink');
+        });
+
+        /*----------------------------------------------------*/
+        /*  End Chatbot
+        /*----------------------------------------------------*/
     });
+
+
+
     // ------------------ End Document ------------------ //
 })(jQuery);
 

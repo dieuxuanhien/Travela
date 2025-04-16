@@ -9,6 +9,7 @@ use App\Services\GeminiService;
 use App\Services\WikipediaService;
 use App\Services\RapidApiService;
 use App\Services\GoogleMapsScraper;
+use App\Services\Map4DService;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,8 +23,12 @@ class ScheduleController
     protected $wikipediaService;
     protected $rapidApiService;
 
+    protected $map4DService;
 
-    public function __construct(MapAPIService $goMapsService, ProvinceService $provinceService, WeatherService $weatherService, GeminiService $geminiService, WikipediaService $wikipediaService, RapidApiService $rapidApiService)
+
+    public function __construct(MapAPIService $goMapsService, ProvinceService $provinceService, WeatherService $weatherService,
+                                GeminiService $geminiService, WikipediaService $wikipediaService, RapidApiService $rapidApiService,
+                                Map4DService  $map4DService)
     {
         $this->goMapsService = $goMapsService;
         $this->provinceService = $provinceService;
@@ -31,7 +36,51 @@ class ScheduleController
         $this->geminiService = $geminiService;
         $this->wikipediaService = $wikipediaService;
         $this->rapidApiService = $rapidApiService;
+        $this->map4DService = $map4DService;
 
+    }
+
+    public function showRoute(Request $request)
+    {
+        // Lấy tọa độ từ request hoặc dùng giá trị mặc định
+        $origin = $request->input('origin', '21.0285,105.8522'); // Mặc định Hồ Hoàn Kiếm
+        $destination = $request->input('destination', '21.0367,105.8347'); // Mặc định Lăng Bác
+        $mode = $request->input('mode', 'car');
+
+        // Gọi phương thức getRoute từ Map4DService
+        $routeData = $this->map4DService->getRoute($origin, $destination, $mode);
+
+        if (!$routeData) {
+            // Xử lý khi không lấy được dữ liệu (API lỗi, ...)
+            // Ví dụ: quay lại trang trước với thông báo lỗi
+            return back()->with('error', 'Không thể tìm thấy đường đi. Vui lòng thử lại.');
+        }
+
+        // Nếu thành công, truyền dữ liệu routeData sang View
+        // $routeData bây giờ chứa thông tin JSON từ API (vd: các đoạn đường, thời gian, khoảng cách)
+        return view('test', [
+            'routeData' => $routeData,
+            'origin' => $origin,
+            'destination' => $destination,
+            'mode' => $mode
+            // Truyền thêm các dữ liệu khác nếu cần cho View
+        ]);
+    }
+    public function searchAddress(Request $request)
+    {
+        $address = $request->input('address');
+        if (!$address) {
+            return response()->json(['error' => 'Vui lòng nhập địa chỉ'], 400);
+        }
+
+        $geocodeResult = $this->map4dService->geocode($address);
+
+        if (!$geocodeResult || empty($geocodeResult['result'])) {
+            return response()->json(['error' => 'Không tìm thấy địa chỉ'], 404);
+        }
+
+        // Trả về kết quả dạng JSON (thường dùng cho AJAX request)
+        return response()->json($geocodeResult);
     }
     public function index()
     {
@@ -51,7 +100,7 @@ class ScheduleController
     {
         $address = $request->input('address');
         $address = str_replace(['Tỉnh ', 'Thành phố '], '', $address);
-        $data = null;
+        $map = null;
         $error = null;
 
         $endpoint = 'weather';
@@ -59,7 +108,7 @@ class ScheduleController
             'query' => $address,
         ];
 
-        $data = $this->rapidApiService->fetchData($params);
+        $map = $this->rapidApiService->fetchData($params);
 
         if ($address) {
             $result = $this->goMapsService->geocode($address); // Gọi API Nominatim
@@ -67,12 +116,12 @@ class ScheduleController
             if (!$result || empty($result)) {
                 $error = 'Không tìm thấy địa điểm.';
             } else {
-                $data = $result[0]; // Nominatim trả về một mảng các kết quả, lấy kết quả đầu tiên
+                $map = $result[0];
             }
         }
-        if (!empty($data)) {
-            $lat = $data['lat'];
-            $lon = $data['lon'];
+        if (!empty($map)) {
+            $lat = $map['lat'];
+            $lon = $map['lon'];
         } else {
             $lat = 10.8206;
             $lon = 106.6281;
@@ -108,63 +157,99 @@ class ScheduleController
         $interest = $request->input('interest');
         $interest = implode(', ', $interest);
 
-        session([
-            'trip_data' => [
+        $preferences = $request->input('interest');
+
+        $places = $this->geminiService->getTourismInfo($address, $preferences);
+        $placeNames = array_keys($places);
+
+        $placeNames = implode(", ", $placeNames);
+
+        $preferences = Preference::query()->get();
+        $address = convertVietnameseToLatin($address);
+
+        $params = $request->query();
+        $query = http_build_query($params);
+        $finalUrl = url('/build-schedule') . '?' . $query;
+
+
+        $data = [
+            'map' => $map,
+            'currencies' => $currencies,
+            'weather' => $weather,
+            'error' => $error,
+            'preferences' => $preferences,
+            'lat' => $lat,
+            'lon' => $lon,
+            'address' => $address,
+            'places' => $places,
+            'finalUrl' => $finalUrl,
+            'for_schedule' => [
                 'address' => $address,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
-                'days' => $days,
+                'placeNames' => $placeNames,
                 'budget' => $budget,
                 'currency' => $currencyCode,
                 'adults' => $adults,
                 'children_1' => $children_1,
                 'children_2' => $children_2,
                 'transportation' => $transportation,
-                'interest' => $interest,
+                'interest' => $interest
+            ],
+            'for_event' => [
+                'address' => $address,
+                'start_date' => $startDate,
+                'end_date' => $endDate
             ]
-        ]);
-
-        $preferences = $request->input('interest');
-
-        $places = $this->geminiService->getTourismInfo($address, $preferences);
-        $placeNames = array_keys($places);
-        foreach ($placeNames as $placeName){
-            $placeName = str_replace("Tên:", "", $placeName);
-            $info_place = $this->testMap($placeName);
-            dd($info_place);
-            dd($placeName);
-        }
-        $placeNames = implode(", ", $placeNames);
-//        dd($placeNames);
-        $preferences = Preference::query()->get();
-        $address = convertVietnameseToLatin($address);
-
-        return view('frontend.schedule.index', compact('data', 'currencies', 'weather', 'error' , 'preferences', 'lat', 'lon', 'address', 'places', 'placeNames'));
+        ];
+        return view('frontend.schedule.index', $data);
     }
     public function build_schedule(Request $request)
     {
-//        dd('123');
-        $address = $tripData['address'] ?? null;
-        $startDate = $tripData['start_date'] ?? null;
-        $endDate = $tripData['end_date'] ?? null;
-        $days = $tripData['days'] ?? null;
-        $budget = $tripData['budget'] ?? null;
-        $currencyCode = $tripData['currency'] ?? null;
-        $adults = $tripData['adults'] ?? null;
-        $children_1 = $tripData['children_1'] ?? null;
-        $children_2 = $tripData['children_2'] ?? null;
-        $transportation = $tripData['transportation'] ?? null;
-        $interest = $tripData['interest'] ?? null;
-
-        session()->forget('trip_data');
-
         $placeNames = $request->input('placeNames');
+//        dd($request->all());
+        $data = [
+            'address' => $placeNames['address'],
+            'start_date' => $placeNames['start_date'],
+            'end_date' => $placeNames['end_date'],
+            'placeName' => $placeNames['placeNames'],
+            'budget' => $placeNames['budget'],
+            'currency' => $placeNames['currency'],
+            'adults' => $placeNames['adults'],
+            'children_1' => $placeNames['children_1'],
+            'children_2' => $placeNames['children_2'],
+            'transportation' => $placeNames['transportation'],
+            'interest' => $placeNames['interest'],
+        ];
+
+
 
         $currencies = Currency::query()->get();
         $preferences = Preference::query()->get();
 
-        $plans = $this->geminiService->generateItinerary($address, $days, $startDate, $endDate, $budget, $currencyCode, $interest, $adults, $children_1, $children_2, $placeNames, $transportation);
-        dd($plans);
+        $plans = $this->geminiService->generateItinerary($data);
+
+        return view('frontend.schedule.ajax.schedule-built', compact('plans', 'currencies', 'preferences'));
+
+    }
+    public function getEventAndActivity(Request $request)
+    {
+//        print_r($request->all());
+        $address = $request->input('address');
+//        dd($address);
+        $data = [
+            'address' => $address['address'],
+            'start_date' => $address['start_date'],
+            'end_date' => $address['end_date']
+        ];
+
+//        dd($data);
+
+//        $currencies = Currency::query()->get();
+//        $preferences = Preference::query()->get();
+
+        $activity = $this->geminiService->getEvent($data);
+        dd($activity);
         return view('frontend.schedule.ajax.schedule-built', compact('plans', 'currencies', 'preferences'));
 
     }

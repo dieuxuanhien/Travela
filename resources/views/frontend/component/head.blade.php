@@ -21,7 +21,7 @@
     <link href="{{asset('/frontend/css/base.css')}}?v={{time()}}" rel="stylesheet">
     <link href="{{asset('/frontend/css/bootstrap.min.css')}}?v={{time()}}" rel="stylesheet">
     <link href="{{asset('/frontend/css/style.css')}}?v={{time()}}" rel="stylesheet">
-
+    <link href="{{asset('/lib/fontawesome/css/all.css')}}?v={{time()}}" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{asset('lib/slick/slick/slick.css')}}?v={{time()}}"/>
 {{--    // Add the new slick-theme.css if you want the default styling--}}
     <link rel="stylesheet" type="text/css" href="{{asset('lib/slick/slick/slick-theme.css')}}?v={{time()}}"/>

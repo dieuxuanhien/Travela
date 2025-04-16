@@ -19,6 +19,7 @@ use App\Http\Controllers\frontend\GuideController;
 use App\Http\Controllers\frontend\TestimonialController;
 use App\Http\Controllers\frontend\ErrorController;
 use App\Http\Controllers\frontend\ScheduleController;
+use App\Http\Controllers\frontend\ChatbotController;
 use App\Http\Controllers\AddressController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -62,13 +63,22 @@ Route::get('/testimonial', [TestimonialController::class, 'index'])->name('testi
 
 Route::get('/testimonial', [TestimonialController::class, 'index'])->name('testimonial.index');
 
+
+//---------------Schedule---------------//
 Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
 Route::get('/place-details', [ScheduleController::class, 'searfchPlace'])->name('place');
 
-//Route::get('/map2', [GoMapsController::class, 'map2'])->name('map2');
 Route::get('/map', [ScheduleController::class, 'map'])->name('map');
 Route::get('/build-schedule', [ScheduleController::class, 'build_schedule'])->name('build-schedule');
+Route::get('/get-event', [ScheduleController::class, 'getEventAndActivity'])->name('get-event');
 Route::get('/directions', [ScheduleController::class, 'getDirections'])->name('directions');
+//---------------End Schedule---------------//
+
+
+
+//---------------Chatbot---------------//
+Route::post('/chatbot', [ChatbotController::class, 'sendMessage'])->name('chatbot');
+//---------------End Chatbot---------------//
 
 Route::get('/404', [ErrorController::class, 'index'])->name('404');
 
@@ -81,17 +91,14 @@ Route::get('/destination-detail/{id}', [DestinationController::class, 'detail'])
 Route::get('/about', [AboutController::class, 'index'])->name('about.index');
 
 
+Route::get('/map-route', [ScheduleController::class, 'showRoute'])->name('map.route');
 
-
+Route::get('/map-search', [ScheduleController::class, 'searchAddress'])->name('map.search');
 
 
 //---------------Logout---------------//
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-
-
-
-//Route::get('/search-location', [GeoLocationController::class, 'search']);
 
 
 

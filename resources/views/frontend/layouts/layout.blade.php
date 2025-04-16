@@ -17,8 +17,26 @@
 
 
 
+<script>
+    // $(document).ready(function() {
+    $('.target-day').on('click', function () {
+        console.log('1232')
+        const targetId = $(this).data('data-target');
+        console.log(targetId)
+        const target = $('#' + targetId);
+        const container = $('#schedule-content');
 
+        if (target.length) {
+            // Tính vị trí top của div mục tiêu so với wrapper
+            const scrollPosition = target.position().top + container.scrollTop();
 
+            container.animate({
+                scrollTop: scrollPosition
+            }, 600); // thời gian scroll
+        }
+    });
+    // });
+</script>
 
 {{--<script>--}}
 {{--    document.addEventListener('livewire:load', function () {--}}

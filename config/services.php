@@ -47,7 +47,12 @@ return [
         'redirect' => env('FB_CALLBACK_REDIRECT')
     ],
 
-    'province_api' => env('PROVINCE_API_URL', 'https://provinces.open-api.vn/api/')
+    'province_api' => env('PROVINCE_API_URL', 'https://provinces.open-api.vn/api/'),
+
+     'map4d' => [
+        'key' => env('MAP4D_API_KEY'),
+        'base_url' => env('MAP4D_BASE_URL', 'https://api.map4d.vn/sdk'),
+    ],
 
 
 ];
